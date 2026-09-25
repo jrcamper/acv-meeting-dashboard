@@ -375,6 +375,8 @@
     const DESIGN_WIDTH = 3840;
     const DESIGN_HEIGHT = 2160;
     const REFRESH_INTERVAL = 60 * 1000;
+    const TIME_ZONE = "Asia/Ho_Chi_Minh";
+    const NEXT_DAY_HOUR = 19;
 
     const dashboard = document.getElementById("dashboard");
     const schedule = document.getElementById("schedule");
@@ -383,10 +385,9 @@
     const clock = document.getElementById("clock");
     const queryBase = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq`;
 
-    let selectedDate = "";
     let allMeetings = [];
-    let loadedDate = false;
     let loadedMeetings = false;
+    let displayedDate = "";
 
     const scaleDashboard = () => {
       const scale = Math.min(innerWidth / DESIGN_WIDTH, innerHeight / DESIGN_HEIGHT);
@@ -399,7 +400,29 @@
       const [day, month, year] = dateText.split("/").map(Number);
       if (!day || !month || !year) return "Lịch họp";
       const names = ["Chủ nhật", "Thứ hai", "Thứ ba", "Thứ tư", "Thứ năm", "Thứ sáu", "Thứ bảy"];
-      return names[new Date(year, month - 1, day).getDay()];
+      return names[new Date(Date.UTC(year, month - 1, day)).getUTCDay()];
+    };
+
+    const displayDateFor = (now = new Date()) => {
+      const parts = Object.fromEntries(
+        new Intl.DateTimeFormat("en-GB", {
+          timeZone: TIME_ZONE,
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          hourCycle: "h23"
+        }).formatToParts(now).filter(({ type }) => type !== "literal").map(({ type, value }) => [type, value])
+      );
+
+      const date = new Date(Date.UTC(Number(parts.year), Number(parts.month) - 1, Number(parts.day)));
+      if (Number(parts.hour) >= NEXT_DAY_HOUR) date.setUTCDate(date.getUTCDate() + 1);
+
+      return [
+        String(date.getUTCDate()).padStart(2, "0"),
+        String(date.getUTCMonth() + 1).padStart(2, "0"),
+        date.getUTCFullYear()
+      ].join("/");
     };
 
     const makeElement = (tag, className, text) => {
@@ -490,7 +513,10 @@
     };
 
     const render = () => {
-      if (!loadedDate || !loadedMeetings) return;
+      if (!loadedMeetings) return;
+
+      const selectedDate = displayDateFor();
+      displayedDate = selectedDate;
 
       dayLabel.textContent = vietnameseDay(selectedDate);
       dateLabel.textContent = selectedDate || "--/--/----";
@@ -500,12 +526,6 @@
         .sort((a, b) => a.start.localeCompare(b.start));
 
       renderMeetings(meetings);
-    };
-
-    window.receiveDisplayDate = (response) => {
-      loadedDate = true;
-      if (response?.status === "ok") selectedDate = cellText(response.table.rows?.[0]?.c?.[0]);
-      render();
     };
 
     window.receiveSchedule = (response) => {
@@ -541,14 +561,13 @@
     };
 
     const refresh = () => {
-      loadedDate = false;
       loadedMeetings = false;
-      loadJsonp("date-data", "B2", "receiveDisplayDate", 0);
       loadJsonp("schedule-data", "A5:H500", "receiveSchedule", 1);
     };
 
     const updateClock = () => {
       clock.textContent = new Intl.DateTimeFormat("vi-VN", {
+        timeZone: TIME_ZONE,
         hour: "2-digit",
         minute: "2-digit",
         second: "2-digit",
@@ -556,6 +575,8 @@
         month: "2-digit",
         year: "numeric"
       }).format(new Date());
+
+      if (loadedMeetings && displayDateFor() !== displayedDate) render();
     };
 
     addEventListener("resize", scaleDashboard, { passive: true });
