@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+  >
+  <meta name="theme-color" content="#ffffff">
+  <title>ACV Meeting Dashboard</title>
+
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    #viewport {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    #dashboard {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 3840px;
+      height: 2160px;
+      overflow: hidden;
+      background: #fff;
+      transform-origin: center;
+      will-change: transform;
+    }
+
+    #sheet {
+      position: absolute;
+      inset: 0;
+      display: block;
+      width: 3840px;
+      height: 2160px;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      border: 0;
+      background: #fff;
+    }
+  </style>
+</head>
+
+<body>
+  <main id="viewport">
+    <div id="dashboard">
+      <iframe
+        id="sheet"
+        title="ACV Daily Meeting Schedule"
+        scrolling="no"
+        allowfullscreen
+      ></iframe>
+    </div>
+  </main>
+
+  <script>
+    const SHEET_ID = "1GBpoK1CnM8MZ6yMA__G2DrHQDpGVogWAtlRj7naFAHU";
+    const GID = "1366504035";
+    const DESIGN_WIDTH = 3840;
+    const DESIGN_HEIGHT = 2160;
+    const REFRESH_INTERVAL = 60 * 1000;
+
+    const dashboard = document.getElementById("dashboard");
+    const sheet = document.getElementById("sheet");
+
+    const sheetUrl = () => {
+      const url = new URL(
+        `https://docs.google.com/spreadsheets/d/${SHEET_ID}/htmlembed`
+      );
+      url.searchParams.set("gid", GID);
+      url.searchParams.set("single", "true");
+      url.searchParams.set("widget", "false");
+      url.searchParams.set("headers", "false");
+      url.searchParams.set("chrome", "false");
+      url.searchParams.set("_refresh", Date.now().toString());
+      return url.toString();
+    };
+
+    const scaleDashboard = () => {
+      const scale = Math.min(
+        window.innerWidth / DESIGN_WIDTH,
+        window.innerHeight / DESIGN_HEIGHT
+      );
+
+      dashboard.style.transform =
+        `translate(-50%, -50%) scale(${scale})`;
+    };
+
+    const refreshSheet = () => {
+      sheet.src = sheetUrl();
+    };
+
+    window.addEventListener("resize", scaleDashboard, { passive: true });
+    window.addEventListener("orientationchange", scaleDashboard, { passive: true });
+
+    scaleDashboard();
+    refreshSheet();
+    window.setInterval(refreshSheet, REFRESH_INTERVAL);
+  </script>
+</body>
+</html>
