@@ -3,13 +3,29 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <meta name="theme-color" content="#071f49">
+  <meta name="theme-color" content="#1e429a">
   <title>ACV Meeting Dashboard</title>
 
   <style>
+    @font-face {
+      font-family: "ACV Sans";
+      src: url("acv-sans-regular.otf") format("opentype");
+      font-display: swap;
+      font-style: normal;
+      font-weight: 100 900;
+    }
+
     :root {
-      color-scheme: dark;
-      font-family: Inter, "Segoe UI", Arial, sans-serif;
+      --acv-cobalt: #1e429a;
+      --acv-cobalt-dark: #102f78;
+      --acv-cobalt-soft: #eaf0fb;
+      --acv-turquoise: #00ffc4;
+      --ink: #12254b;
+      --muted: #536987;
+      --line: #cad6ea;
+      --surface: #ffffff;
+      font-family: "ACV Sans", Verdana, Arial, sans-serif;
+      color: var(--ink);
     }
 
     * { box-sizing: border-box; }
@@ -20,7 +36,7 @@
       height: 100%;
       margin: 0;
       overflow: hidden;
-      background: #031126;
+      background: #dfe7f4;
     }
 
     #viewport {
@@ -29,10 +45,7 @@
       overflow: hidden;
       display: grid;
       place-items: center;
-      background:
-        radial-gradient(circle at 8% 0%, rgba(0, 165, 229, .20), transparent 34%),
-        radial-gradient(circle at 94% 100%, rgba(20, 91, 196, .20), transparent 38%),
-        #031126;
+      background: #dfe7f4;
     }
 
     #dashboard {
@@ -41,210 +54,292 @@
       top: 50%;
       width: 3840px;
       height: 2160px;
-      transform-origin: center;
       overflow: hidden;
-      color: #f7fbff;
-      background: linear-gradient(135deg, rgba(7, 38, 82, .98), rgba(2, 15, 35, .99) 55%, rgba(5, 28, 62, .98));
-    }
-
-    #dashboard::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      opacity: .18;
-      background-image:
-        linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
-      background-size: 90px 90px;
+      transform-origin: center;
+      background:
+        linear-gradient(90deg, rgba(30, 66, 154, .035) 1px, transparent 1px),
+        linear-gradient(rgba(30, 66, 154, .035) 1px, transparent 1px),
+        #f5f7fb;
+      background-size: 96px 96px;
     }
 
     .shell {
-      position: relative;
-      z-index: 1;
       height: 100%;
-      padding: 100px 124px 82px;
+      padding: 72px 104px 58px;
       display: grid;
-      grid-template-rows: 300px 1fr 84px;
-      gap: 46px;
+      grid-template-rows: 310px minmax(0, 1fr) 72px;
+      gap: 34px;
     }
 
     header {
+      position: relative;
       display: grid;
-      grid-template-columns: 1fr auto;
+      grid-template-columns: minmax(0, 1fr) 850px;
+      overflow: hidden;
+      border-radius: 28px;
+      background: var(--surface);
+      box-shadow: 0 18px 55px rgba(29, 62, 128, .13);
+    }
+
+    header::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 850px;
+      bottom: 0;
+      height: 13px;
+      background: linear-gradient(90deg, var(--acv-turquoise) 0 36%, var(--acv-cobalt) 36% 100%);
+    }
+
+    .brand {
+      min-width: 0;
+      padding: 47px 70px 54px;
+      display: flex;
       align-items: center;
-      padding: 0 62px;
-      border: 1px solid rgba(125, 207, 255, .24);
-      border-radius: 48px;
-      background: linear-gradient(120deg, rgba(12, 57, 117, .82), rgba(4, 24, 54, .78));
-      box-shadow: 0 28px 80px rgba(0, 0, 0, .24), inset 0 1px 0 rgba(255,255,255,.07);
+      gap: 68px;
     }
 
-    .brand { display: flex; align-items: center; gap: 48px; }
-
-    .mark {
-      width: 172px;
-      height: 172px;
-      display: grid;
-      place-items: center;
-      border-radius: 44px;
-      color: white;
-      font-size: 68px;
-      font-weight: 900;
-      letter-spacing: -5px;
-      background: linear-gradient(145deg, #00a9e7, #0752ad);
-      box-shadow: 0 22px 60px rgba(0, 154, 225, .28);
+    .logo-wrap {
+      width: 430px;
+      flex: 0 0 430px;
+      padding-right: 68px;
+      border-right: 2px solid var(--line);
     }
+
+    .logo-wrap img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .brand-copy { min-width: 0; }
 
     h1 {
       margin: 0;
-      font-size: 92px;
-      line-height: 1;
-      letter-spacing: -3px;
+      color: var(--acv-cobalt);
+      font-size: 86px;
+      font-weight: 800;
+      line-height: .98;
+      letter-spacing: -2px;
       text-transform: uppercase;
     }
 
     .subtitle {
-      margin-top: 25px;
-      color: #9ec8ef;
-      font-size: 37px;
-      letter-spacing: 5px;
+      margin-top: 24px;
+      color: var(--muted);
+      font-size: 34px;
+      line-height: 1.15;
+      letter-spacing: 2px;
       text-transform: uppercase;
     }
 
-    .date-block { text-align: right; }
+    .date-block {
+      position: relative;
+      isolation: isolate;
+      padding: 54px 70px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      justify-content: center;
+      overflow: hidden;
+      color: white;
+      text-align: right;
+      background: var(--acv-cobalt);
+    }
+
+    .date-block::before,
+    .date-block::after {
+      content: "";
+      position: absolute;
+      z-index: -1;
+      width: 420px;
+      height: 78px;
+      right: -92px;
+      background: var(--acv-turquoise);
+      opacity: .16;
+      transform: skewX(-38deg);
+    }
+
+    .date-block::before { top: 35px; }
+    .date-block::after { bottom: 38px; right: 70px; }
 
     #day-label {
-      color: #7fd7ff;
-      font-size: 42px;
+      color: var(--acv-turquoise);
+      font-size: 43px;
       font-weight: 700;
-      letter-spacing: 6px;
+      letter-spacing: 5px;
       text-transform: uppercase;
     }
 
     #date-label {
       margin-top: 13px;
       font-size: 82px;
-      font-weight: 850;
-      letter-spacing: 2px;
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: 1px;
     }
 
     #schedule {
       min-height: 0;
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 34px;
+      grid-template-rows: repeat(2, minmax(0, 1fr));
+      gap: 28px;
     }
 
     .meeting {
+      --title-size: 43px;
+      --meta-size: 29px;
+      min-width: 0;
       min-height: 0;
-      padding: 42px 46px;
       display: grid;
-      grid-template-columns: 245px 1fr;
-      gap: 38px;
+      grid-template-rows: 110px minmax(0, 1fr);
       overflow: hidden;
-      border: 1px solid rgba(130, 205, 255, .22);
-      border-radius: 38px;
-      background: linear-gradient(145deg, rgba(16, 55, 103, .88), rgba(5, 29, 62, .88));
-      box-shadow: 0 22px 55px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.05);
+      border: 2px solid var(--line);
+      border-radius: 24px;
+      background: var(--surface);
+      box-shadow: 0 12px 34px rgba(24, 55, 120, .08);
     }
 
-    .meeting.cancelled {
-      opacity: .7;
-      border-color: rgba(255, 121, 121, .42);
+    .meeting.cancelled { border-color: #f09b9b; }
+
+    .meeting-head {
+      padding: 0 38px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      color: white;
+      background: var(--acv-cobalt);
     }
+
+    .meeting.cancelled .meeting-head { background: #9d3340; }
 
     .time {
-      padding-right: 36px;
       display: flex;
-      flex-direction: column;
-      justify-content: center;
-      border-right: 2px solid rgba(78, 184, 240, .30);
+      align-items: baseline;
+      gap: 24px;
+      white-space: nowrap;
     }
 
     .start {
-      color: #60d4ff;
-      font-size: 68px;
+      font-size: 55px;
       font-weight: 850;
+      line-height: 1;
       letter-spacing: 1px;
     }
 
     .end {
-      margin-top: 18px;
-      color: #8eaecf;
-      font-size: 33px;
-      font-weight: 650;
+      color: #dce8ff;
+      font-size: 29px;
+      line-height: 1;
     }
 
-    .details {
-      min-width: 0;
+    .status {
+      max-width: 48%;
+      padding: 12px 20px 10px;
+      overflow-wrap: anywhere;
+      border: 2px solid rgba(0, 255, 196, .58);
+      border-radius: 999px;
+      color: var(--acv-turquoise);
+      font-size: 25px;
+      font-weight: 700;
+      line-height: 1.05;
+      text-align: right;
+    }
+
+    .meeting-body {
+      min-height: 0;
+      padding: 31px 38px 34px;
       display: flex;
       flex-direction: column;
-      justify-content: center;
+      justify-content: flex-start;
+      gap: 25px;
     }
 
     .title {
-      display: -webkit-box;
-      overflow: hidden;
-      color: #fff;
-      font-size: 42px;
-      font-weight: 780;
-      line-height: 1.19;
-      -webkit-box-orient: vertical;
-      -webkit-line-clamp: 3;
+      color: var(--acv-cobalt-dark);
+      font-size: var(--title-size);
+      font-weight: 800;
+      line-height: 1.16;
+      overflow-wrap: anywhere;
     }
 
     .meta {
-      margin-top: 26px;
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 13px 30px;
-      color: #b7d1e9;
-      font-size: 28px;
-      line-height: 1.25;
+      gap: 16px;
+      color: var(--ink);
+      font-size: var(--meta-size);
+      line-height: 1.22;
     }
 
-    .meta span {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+    .meta-row {
+      display: grid;
+      grid-template-columns: 160px minmax(0, 1fr);
+      gap: 20px;
+      align-items: start;
     }
 
-    .meta strong { color: #69cfff; font-weight: 700; }
+    .meta-label {
+      color: var(--acv-cobalt);
+      font-weight: 800;
+    }
+
+    .meta-value {
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+
+    .notice {
+      padding: 15px 20px 13px;
+      border-left: 8px solid var(--acv-turquoise);
+      color: var(--acv-cobalt-dark);
+      background: #e9fff9;
+    }
 
     footer {
-      display: flex;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
       align-items: center;
-      justify-content: space-between;
-      padding: 0 18px;
-      color: #7999b9;
-      font-size: 28px;
-      letter-spacing: 1px;
+      gap: 38px;
+      color: var(--muted);
+      font-size: 27px;
+      line-height: 1;
     }
 
-    #clock { color: #b7d8f4; font-variant-numeric: tabular-nums; }
+    #page-indicator {
+      min-width: 210px;
+      color: var(--acv-cobalt);
+      font-weight: 800;
+      text-align: center;
+    }
+
+    #clock {
+      color: var(--acv-cobalt);
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+    }
 
     .state {
-      height: 100%;
       grid-column: 1 / -1;
+      grid-row: 1 / -1;
       display: grid;
       place-items: center;
+      border: 2px solid var(--line);
+      border-radius: 24px;
+      color: var(--muted);
+      background: white;
       text-align: center;
-      color: #9ec8ef;
-      font-size: 50px;
+      font-size: 42px;
     }
 
     .state strong {
       display: block;
       margin-bottom: 20px;
-      color: white;
-      font-size: 72px;
+      color: var(--acv-cobalt);
+      font-size: 66px;
     }
-
-    #schedule[data-density="high"] .meeting { padding: 30px 36px; grid-template-columns: 210px 1fr; }
-    #schedule[data-density="high"] .start { font-size: 58px; }
-    #schedule[data-density="high"] .title { font-size: 35px; -webkit-line-clamp: 2; }
-    #schedule[data-density="high"] .meta { margin-top: 16px; font-size: 23px; }
   </style>
 </head>
 
@@ -254,8 +349,10 @@
       <div class="shell">
         <header>
           <div class="brand">
-            <div class="mark">ACV</div>
-            <div>
+            <div class="logo-wrap">
+              <img src="acv-logo.png" alt="ACV">
+            </div>
+            <div class="brand-copy">
               <h1>Lịch họp hôm nay</h1>
               <div class="subtitle">Tổng công ty Cảng hàng không Việt Nam</div>
             </div>
@@ -267,11 +364,12 @@
         </header>
 
         <div id="schedule">
-          <div class="state"><div><strong>Đang tải lịch họp</strong>Vui lòng chờ trong giây lát…</div></div>
+          <div class="state"><div><strong>Đang tải lịch họp</strong>Vui lòng chờ trong giây lát...</div></div>
         </div>
 
         <footer>
-          <span>Dữ liệu trực tiếp từ Google Sheets · tự động cập nhật mỗi 60 giây</span>
+          <span>Dữ liệu trực tiếp từ Google Sheets - tự động cập nhật mỗi 60 giây</span>
+          <span id="page-indicator"></span>
           <span id="clock">--:--:--</span>
         </footer>
       </div>
@@ -284,17 +382,22 @@
     const DATA_GID = "1071047193";   // Source tab used by the Canvas.
     const DESIGN_WIDTH = 3840;
     const DESIGN_HEIGHT = 2160;
+    const PAGE_SIZE = 6;
+    const PAGE_INTERVAL = 15 * 1000;
     const REFRESH_INTERVAL = 60 * 1000;
 
     const dashboard = document.getElementById("dashboard");
     const schedule = document.getElementById("schedule");
     const dayLabel = document.getElementById("day-label");
     const dateLabel = document.getElementById("date-label");
+    const pageIndicator = document.getElementById("page-indicator");
     const clock = document.getElementById("clock");
     const queryBase = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq`;
 
     let selectedDate = "";
     let allMeetings = [];
+    let pages = [];
+    let currentPage = 0;
     let loadedDate = false;
     let loadedMeetings = false;
 
@@ -303,7 +406,7 @@
       dashboard.style.transform = `translate(-50%, -50%) scale(${scale})`;
     };
 
-    const cellText = (cell) => cell?.f ?? cell?.v ?? "";
+    const cellText = (cell) => String(cell?.f ?? cell?.v ?? "").trim();
 
     const vietnameseDay = (dateText) => {
       const [day, month, year] = dateText.split("/").map(Number);
@@ -312,20 +415,97 @@
       return names[new Date(year, month - 1, day).getDay()];
     };
 
-    const addText = (parent, className, value) => {
-      const element = document.createElement("div");
+    const chunk = (items, size) => {
+      const result = [];
+      for (let index = 0; index < items.length; index += size) result.push(items.slice(index, index + size));
+      return result;
+    };
+
+    const makeElement = (tag, className, text) => {
+      const element = document.createElement(tag);
       element.className = className;
-      element.textContent = value;
-      parent.appendChild(element);
+      if (text !== undefined) element.textContent = text;
       return element;
     };
 
-    const addMeta = (parent, label, value) => {
-      const item = document.createElement("span");
-      const strong = document.createElement("strong");
-      strong.textContent = `${label}: `;
-      item.append(strong, document.createTextNode(value || "—"));
-      parent.appendChild(item);
+    const addMeta = (parent, label, value, extraClass = "") => {
+      const row = makeElement("div", `meta-row ${extraClass}`.trim());
+      row.append(
+        makeElement("div", "meta-label", label),
+        makeElement("div", "meta-value", value || "-")
+      );
+      parent.appendChild(row);
+    };
+
+    const fitCard = (card) => {
+      const title = card.querySelector(".title");
+      const meta = card.querySelector(".meta");
+      let titleSize = 43;
+      let metaSize = 29;
+
+      card.style.setProperty("--title-size", `${titleSize}px`);
+      card.style.setProperty("--meta-size", `${metaSize}px`);
+
+      while (card.scrollHeight > card.clientHeight && titleSize > 25) {
+        titleSize -= 1;
+        metaSize = Math.max(20, metaSize - .55);
+        card.style.setProperty("--title-size", `${titleSize}px`);
+        card.style.setProperty("--meta-size", `${metaSize}px`);
+      }
+
+      if (card.scrollHeight > card.clientHeight) {
+        title.style.lineHeight = "1.08";
+        meta.style.lineHeight = "1.12";
+      }
+    };
+
+    const renderPage = () => {
+      schedule.replaceChildren();
+
+      if (!pages.length) {
+        const state = makeElement("div", "state");
+        const content = makeElement("div", "");
+        content.append(
+          makeElement("strong", "", "Không có lịch họp"),
+          document.createTextNode("Không tìm thấy cuộc họp cho ngày đã chọn.")
+        );
+        state.appendChild(content);
+        schedule.appendChild(state);
+        pageIndicator.textContent = "";
+        return;
+      }
+
+      currentPage = Math.min(currentPage, pages.length - 1);
+      const visibleMeetings = pages[currentPage];
+
+      visibleMeetings.forEach((meeting) => {
+        const card = makeElement("article", `meeting${/hủy/i.test(meeting.status) ? " cancelled" : ""}`);
+        const head = makeElement("div", "meeting-head");
+        const time = makeElement("div", "time");
+        time.append(
+          makeElement("span", "start", meeting.start || "--:--"),
+          makeElement("span", "end", meeting.end ? `đến ${meeting.end}` : "")
+        );
+        head.appendChild(time);
+        if (meeting.status && meeting.status !== "Theo lịch") {
+          head.appendChild(makeElement("span", "status", meeting.status));
+        }
+
+        const body = makeElement("div", "meeting-body");
+        body.appendChild(makeElement("div", "title", meeting.title || "Cuộc họp"));
+
+        const meta = makeElement("div", "meta");
+        addMeta(meta, "Địa điểm", meeting.location);
+        addMeta(meta, "Chủ trì", meeting.host);
+        if (meeting.notice) addMeta(meta, "Thông báo", meeting.notice, "notice");
+        body.appendChild(meta);
+
+        card.append(head, body);
+        schedule.appendChild(card);
+      });
+
+      pageIndicator.textContent = pages.length > 1 ? `Trang ${currentPage + 1} / ${pages.length}` : "";
+      requestAnimationFrame(() => schedule.querySelectorAll(".meeting").forEach(fitCard));
     };
 
     const render = () => {
@@ -338,46 +518,9 @@
         .filter((meeting) => meeting.date === selectedDate)
         .sort((a, b) => a.start.localeCompare(b.start));
 
-      schedule.replaceChildren();
-      schedule.dataset.density = meetings.length > 9 ? "high" : "normal";
-      schedule.style.gridTemplateRows = `repeat(${Math.max(1, Math.ceil(meetings.length / 3))}, minmax(0, 1fr))`;
-
-      if (!meetings.length) {
-        const state = document.createElement("div");
-        state.className = "state";
-        const content = document.createElement("div");
-        const heading = document.createElement("strong");
-        heading.textContent = "Không có lịch họp";
-        content.append(heading, document.createTextNode("Không tìm thấy cuộc họp cho ngày đã chọn."));
-        state.appendChild(content);
-        schedule.appendChild(state);
-        return;
-      }
-
-      meetings.forEach((meeting) => {
-        const card = document.createElement("article");
-        card.className = `meeting${/hủy/i.test(meeting.status) ? " cancelled" : ""}`;
-
-        const time = document.createElement("div");
-        time.className = "time";
-        addText(time, "start", meeting.start || "--:--");
-        addText(time, "end", meeting.end ? `đến ${meeting.end}` : "");
-
-        const details = document.createElement("div");
-        details.className = "details";
-        addText(details, "title", meeting.title || "Cuộc họp");
-
-        const meta = document.createElement("div");
-        meta.className = "meta";
-        addMeta(meta, "Địa điểm", meeting.location);
-        addMeta(meta, "Chủ trì", meeting.host);
-        if (meeting.notice) addMeta(meta, "Thông báo", meeting.notice);
-        if (meeting.status && meeting.status !== "Theo lịch") addMeta(meta, "Trạng thái", meeting.status);
-        details.appendChild(meta);
-
-        card.append(time, details);
-        schedule.appendChild(card);
-      });
+      pages = chunk(meetings, PAGE_SIZE);
+      currentPage = 0;
+      renderPage();
     };
 
     window.receiveDisplayDate = (response) => {
@@ -427,8 +570,12 @@
 
     const updateClock = () => {
       clock.textContent = new Intl.DateTimeFormat("vi-VN", {
-        hour: "2-digit", minute: "2-digit", second: "2-digit",
-        day: "2-digit", month: "2-digit", year: "numeric"
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric"
       }).format(new Date());
     };
 
@@ -437,8 +584,15 @@
     scaleDashboard();
     updateClock();
     refresh();
+
     setInterval(updateClock, 1000);
     setInterval(refresh, REFRESH_INTERVAL);
+    setInterval(() => {
+      if (pages.length > 1) {
+        currentPage = (currentPage + 1) % pages.length;
+        renderPage();
+      }
+    }, PAGE_INTERVAL);
   </script>
 </body>
 </html>
