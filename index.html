@@ -375,6 +375,7 @@
     const DESIGN_WIDTH = 3840;
     const DESIGN_HEIGHT = 2160;
     const REFRESH_INTERVAL = 60 * 1000;
+    const FULL_PAGE_REFRESH_INTERVAL = 5 * 60 * 1000;
     const TIME_ZONE = "Asia/Ho_Chi_Minh";
     const NEXT_DAY_HOUR = 19;
 
@@ -587,6 +588,7 @@
 
     setInterval(updateClock, 1000);
     setInterval(refresh, REFRESH_INTERVAL);
+    setInterval(() => location.reload(), FULL_PAGE_REFRESH_INTERVAL);
   </script>
 </body>
 </html>
