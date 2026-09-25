@@ -180,10 +180,12 @@
     }
 
     #schedule {
+      --schedule-columns: 3;
+      --schedule-rows: 3;
       min-height: 0;
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      grid-template-rows: repeat(2, minmax(0, 1fr));
+      grid-template-columns: repeat(var(--schedule-columns), minmax(0, 1fr));
+      grid-template-rows: repeat(var(--schedule-rows), minmax(0, 1fr));
       gap: 28px;
     }
 
@@ -298,20 +300,12 @@
     }
 
     footer {
-      display: grid;
-      grid-template-columns: 1fr auto 1fr;
+      display: flex;
       align-items: center;
-      gap: 38px;
+      justify-content: flex-end;
       color: var(--muted);
       font-size: 27px;
       line-height: 1;
-    }
-
-    #page-indicator {
-      min-width: 210px;
-      color: var(--acv-cobalt);
-      font-weight: 800;
-      text-align: center;
     }
 
     #clock {
@@ -368,8 +362,6 @@
         </div>
 
         <footer>
-          <span>Dữ liệu trực tiếp từ Google Sheets - tự động cập nhật mỗi 60 giây</span>
-          <span id="page-indicator"></span>
           <span id="clock">--:--:--</span>
         </footer>
       </div>
@@ -382,22 +374,17 @@
     const DATA_GID = "1071047193";   // Source tab used by the Canvas.
     const DESIGN_WIDTH = 3840;
     const DESIGN_HEIGHT = 2160;
-    const PAGE_SIZE = 6;
-    const PAGE_INTERVAL = 15 * 1000;
     const REFRESH_INTERVAL = 60 * 1000;
 
     const dashboard = document.getElementById("dashboard");
     const schedule = document.getElementById("schedule");
     const dayLabel = document.getElementById("day-label");
     const dateLabel = document.getElementById("date-label");
-    const pageIndicator = document.getElementById("page-indicator");
     const clock = document.getElementById("clock");
     const queryBase = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq`;
 
     let selectedDate = "";
     let allMeetings = [];
-    let pages = [];
-    let currentPage = 0;
     let loadedDate = false;
     let loadedMeetings = false;
 
@@ -413,12 +400,6 @@
       if (!day || !month || !year) return "Lịch họp";
       const names = ["Chủ nhật", "Thứ hai", "Thứ ba", "Thứ tư", "Thứ năm", "Thứ sáu", "Thứ bảy"];
       return names[new Date(year, month - 1, day).getDay()];
-    };
-
-    const chunk = (items, size) => {
-      const result = [];
-      for (let index = 0; index < items.length; index += size) result.push(items.slice(index, index + size));
-      return result;
     };
 
     const makeElement = (tag, className, text) => {
@@ -459,10 +440,10 @@
       }
     };
 
-    const renderPage = () => {
+    const renderMeetings = (meetings) => {
       schedule.replaceChildren();
 
-      if (!pages.length) {
+      if (!meetings.length) {
         const state = makeElement("div", "state");
         const content = makeElement("div", "");
         content.append(
@@ -471,14 +452,15 @@
         );
         state.appendChild(content);
         schedule.appendChild(state);
-        pageIndicator.textContent = "";
         return;
       }
 
-      currentPage = Math.min(currentPage, pages.length - 1);
-      const visibleMeetings = pages[currentPage];
+      const columns = meetings.length <= 4 ? 2 : meetings.length <= 12 ? 3 : 4;
+      const rows = Math.ceil(meetings.length / columns);
+      schedule.style.setProperty("--schedule-columns", columns);
+      schedule.style.setProperty("--schedule-rows", rows);
 
-      visibleMeetings.forEach((meeting) => {
+      meetings.forEach((meeting) => {
         const card = makeElement("article", `meeting${/hủy/i.test(meeting.status) ? " cancelled" : ""}`);
         const head = makeElement("div", "meeting-head");
         const time = makeElement("div", "time");
@@ -504,7 +486,6 @@
         schedule.appendChild(card);
       });
 
-      pageIndicator.textContent = pages.length > 1 ? `Trang ${currentPage + 1} / ${pages.length}` : "";
       requestAnimationFrame(() => schedule.querySelectorAll(".meeting").forEach(fitCard));
     };
 
@@ -518,9 +499,7 @@
         .filter((meeting) => meeting.date === selectedDate)
         .sort((a, b) => a.start.localeCompare(b.start));
 
-      pages = chunk(meetings, PAGE_SIZE);
-      currentPage = 0;
-      renderPage();
+      renderMeetings(meetings);
     };
 
     window.receiveDisplayDate = (response) => {
@@ -587,12 +566,6 @@
 
     setInterval(updateClock, 1000);
     setInterval(refresh, REFRESH_INTERVAL);
-    setInterval(() => {
-      if (pages.length > 1) {
-        currentPage = (currentPage + 1) % pages.length;
-        renderPage();
-      }
-    }, PAGE_INTERVAL);
   </script>
 </body>
 </html>
