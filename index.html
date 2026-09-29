@@ -397,6 +397,45 @@
 
     const cellText = (cell) => String(cell?.f ?? cell?.v ?? "").trim();
 
+    const normalizedDate = (cell) => {
+      const rawValue = cell?.v;
+      const googleDate = typeof rawValue === "string"
+        ? rawValue.match(/^Date\((\d{4}),\s*(\d{1,2}),\s*(\d{1,2})\)$/)
+        : null;
+
+      if (googleDate) {
+        const [, year, zeroBasedMonth, day] = googleDate;
+        return [
+          String(day).padStart(2, "0"),
+          String(Number(zeroBasedMonth) + 1).padStart(2, "0"),
+          year
+        ].join("/");
+      }
+
+      const text = cellText(cell);
+      const dayFirst = text.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{4})$/);
+      const yearFirst = text.match(/^(\d{4})[\/.\-](\d{1,2})[\/.\-](\d{1,2})$/);
+      const parts = dayFirst
+        ? { day: dayFirst[1], month: dayFirst[2], year: dayFirst[3] }
+        : yearFirst
+          ? { day: yearFirst[3], month: yearFirst[2], year: yearFirst[1] }
+          : null;
+
+      if (!parts) return text;
+
+      const day = Number(parts.day);
+      const month = Number(parts.month);
+      const year = Number(parts.year);
+      const date = new Date(Date.UTC(year, month - 1, day));
+      const isValid = date.getUTCFullYear() === year
+        && date.getUTCMonth() === month - 1
+        && date.getUTCDate() === day;
+
+      return isValid
+        ? `${String(day).padStart(2, "0")}/${String(month).padStart(2, "0")}/${year}`
+        : text;
+    };
+
     const vietnameseDay = (dateText) => {
       const [day, month, year] = dateText.split("/").map(Number);
       if (!day || !month || !year) return "Lịch họp";
@@ -533,7 +572,7 @@
       loadedMeetings = true;
       if (response?.status === "ok") {
         allMeetings = (response.table.rows || []).map(({ c = [] }) => ({
-          date: cellText(c[0]),
+          date: normalizedDate(c[0]),
           start: cellText(c[1]),
           end: cellText(c[2]),
           title: cellText(c[3]),
