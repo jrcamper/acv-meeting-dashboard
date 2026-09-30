@@ -374,8 +374,8 @@
     const DATA_GID = "1071047193";   // Source tab used by the Canvas.
     const DESIGN_WIDTH = 3840;
     const DESIGN_HEIGHT = 2160;
-    const REFRESH_INTERVAL = 60 * 1000;
-    const FULL_PAGE_REFRESH_INTERVAL = 5 * 60 * 1000;
+    const REFRESH_INTERVAL = 30 * 1000;
+    const FULL_PAGE_REFRESH_INTERVAL = 60 * 1000;
     const TIME_ZONE = "Asia/Ho_Chi_Minh";
     const NEXT_DAY_HOUR = 19;
 
@@ -389,6 +389,7 @@
     let allMeetings = [];
     let loadedMeetings = false;
     let displayedDate = "";
+    const pageLoadedAt = Date.now();
 
     const scaleDashboard = () => {
       const scale = Math.min(innerWidth / DESIGN_WIDTH, innerHeight / DESIGN_HEIGHT);
@@ -605,6 +606,16 @@
       loadJsonp("schedule-data", "A5:H500", "receiveSchedule", 1);
     };
 
+    const forcePageRefresh = () => {
+      const url = new URL(location.href);
+      url.searchParams.set("refresh", String(Date.now()));
+      location.replace(url.href);
+    };
+
+    const refreshIfOverdue = () => {
+      if (Date.now() - pageLoadedAt >= FULL_PAGE_REFRESH_INTERVAL) forcePageRefresh();
+    };
+
     const updateClock = () => {
       clock.textContent = new Intl.DateTimeFormat("vi-VN", {
         timeZone: TIME_ZONE,
@@ -621,13 +632,18 @@
 
     addEventListener("resize", scaleDashboard, { passive: true });
     addEventListener("orientationchange", scaleDashboard, { passive: true });
+    addEventListener("focus", refreshIfOverdue);
+    addEventListener("pageshow", refreshIfOverdue);
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) refreshIfOverdue();
+    });
     scaleDashboard();
     updateClock();
     refresh();
 
     setInterval(updateClock, 1000);
     setInterval(refresh, REFRESH_INTERVAL);
-    setInterval(() => location.reload(), FULL_PAGE_REFRESH_INTERVAL);
+    setTimeout(forcePageRefresh, FULL_PAGE_REFRESH_INTERVAL);
   </script>
 </body>
 </html>
