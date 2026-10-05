@@ -398,6 +398,18 @@
 
     const cellText = (cell) => String(cell?.f ?? cell?.v ?? "").trim();
 
+    const normalizedTime = (cell) => {
+      const text = cellText(cell);
+      const match = text.match(/^(\d{1,2}):(\d{2})(?::\d{2})?$/);
+      if (!match) return text;
+
+      const hour = Number(match[1]);
+      const minute = Number(match[2]);
+      return hour <= 23 && minute <= 59
+        ? `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`
+        : text;
+    };
+
     const normalizedDate = (cell) => {
       const rawValue = cell?.v;
       const googleDate = typeof rawValue === "string"
@@ -574,8 +586,8 @@
       if (response?.status === "ok") {
         allMeetings = (response.table.rows || []).map(({ c = [] }) => ({
           date: normalizedDate(c[0]),
-          start: cellText(c[1]),
-          end: cellText(c[2]),
+          start: normalizedTime(c[1]),
+          end: normalizedTime(c[2]),
           title: cellText(c[3]),
           location: cellText(c[4]),
           host: cellText(c[5]),
@@ -621,10 +633,7 @@
         timeZone: TIME_ZONE,
         hour: "2-digit",
         minute: "2-digit",
-        second: "2-digit",
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric"
+        hourCycle: "h23"
       }).format(new Date());
 
       if (loadedMeetings && displayDateFor() !== displayedDate) render();
